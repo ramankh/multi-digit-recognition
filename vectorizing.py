@@ -3,14 +3,16 @@ import numpy as np
 import pickle
 import h5py
 
-number_of_images = 13068 #33402
+number_of_images = 13068 #33402   #
 #dic_pick = pickle.load( open( "train_metadata.pickle", "rb" ) )
 dic_pick = pickle.load( open( "test_metadata.pickle", "rb" ) )
 length = [len(x) for x in dic_pick["label"]]
 inpt= np.ndarray((number_of_images,784))
 labels = np.ndarray((number_of_images, 7))
-labels_one_hot = np.ndarray((number_of_images, 5, 11)) #(0-9 and blank)
+labels_one_hot = np.ndarray((number_of_images, 5, 10)) #(0-9 and blank)
 length_one_hot = np.ndarray((number_of_images,7)) # (0-5 and more than 5)
+
+
 labels_one_hot.fill(0)
 
 
@@ -33,15 +35,17 @@ while i<number_of_images:
 		print "i={}--index={}".format(i,index)
 		if index<5:
 			labels[i][index] = item
-			labels_one_hot[i][index][item] = 1
+			if item == 10:
+				labels_one_hot[i][index][0] = 1
+			else:
+				labels_one_hot[i][index][item] = 1
+
 	digit_numbers = len(dic_pick["label"][i])
+	# find length of labels and save theme one-hot coded
 	if digit_numbers<=5:
 		length_one_hot[i][digit_numbers] = 1
 	else:
 		length_one_hot[i][6] = 1
-	while (5-digit_numbers)>0:
-		labels_one_hot[i][digit_numbers][10]=1
-		digit_numbers+=1
 
 	i+=1
 
@@ -53,34 +57,6 @@ char_two_lbl = np.array([labels_one_hot[i][1][:] for i in range(number_of_images
 char_three_lbl = np.array([labels_one_hot[i][2][:] for i in range(number_of_images-1)])
 char_four_lbl = np.array([labels_one_hot[i][3][:] for i in range(number_of_images-1)])
 char_five_lbl = np.array([labels_one_hot[i][4][:] for i in range(number_of_images-1)])
-
-#print char_one_lbl.shape
-#print char_one_lbl[61]
-
-#cv2.imwrite("Temp/{}.png".format(1), img)
-'''
-f = h5py.File("mydata.hdf5", "w")
-
-f["data"] = inpt
-f["labels"] = labels
-f["length"] = length
-f["length_lbl"] = length_one_hot
-f["ch_one_lbl"] = char_one_lbl
-f["ch_two_lbl"] = char_two_lbl
-f["ch_three_lbl"] = char_three_lbl
-f["ch_four_lbl"] = char_four_lbl
-f["ch_five_lbl"] = char_five_lbl
-
-f.close()
-
-f_in = h5py.File("mydata.hdf5", "r")
-arr = f_in["data"]
-labs = f_in["labels"]
-arr2 = np.array(labs)
-arr3 = np.array(f_in["length"])
-f_in.close()
-'''
-
 
 data_dict = {
 	'data': inpt,
